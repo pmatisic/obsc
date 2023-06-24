@@ -108,6 +108,8 @@ class GeneticAlgorithm:
         self.crossover_operator = crossover_operator
         self.selection_operator = selection_operator
         self.mutation_attempts = mutation_attempts
+        self.generation_count = 0
+        self.fitness_progress = []
 
     def adjust_mutation_rate(self, scores, previous_average):
         current_average = sum(scores) / len(scores)
@@ -124,15 +126,33 @@ class GeneticAlgorithm:
             return True
         return False
 
+    def run(self, initial_population, generation_limit):
+        population = initial_population
+        best_solution = None
+        best_fitness = float('inf')
+        while self.generation_count < generation_limit:
+            scores = [evaluate_solution(individual) for individual in population]
+            self.fitness_progress.append(min(scores))
+            print(f"Generation {self.generation_count}: Fitness: {min(scores)}")
+            self.generation_count += 1
+            current_best_fitness = min(scores)
+            if current_best_fitness < best_fitness:
+                best_fitness = current_best_fitness
+                best_solution = population[scores.index(best_fitness)]
+            for i in range(len(population)):
+                if random.random() < self.mutation_rate:
+                    population[i].mutate()
+                if random.random() < self.mutation_rate:
+                    idx = random.randint(0, len(population) - 1)
+                    population[i], population[idx] = self.crossover_operator(population[i], population[idx])
+        save_best_solution(best_solution)
+        print(f"Best fitness: {best_fitness}")
+
 def uniform_crossover(parent1, parent2):
-    child1, child2 = [], []
-    for gene1, gene2 in zip(parent1, parent2):
+    child1, child2 = parent1.copy(), parent2.copy()
+    for i in range(len(child1)):
         if random.random() < 0.5:
-            child1.append(Battery(gene1.x, gene1.y, gene1.a, gene1.b, gene1.rotation, add_to_container=False))
-            child2.append(Battery(gene2.x, gene2.y, gene2.a, gene2.b, gene2.rotation, add_to_container=False))
-        else:
-            child1.append(Battery(gene2.x, gene2.y, gene2.a, gene2.b, gene2.rotation, add_to_container=False))
-            child2.append(Battery(gene1.x, gene1.y, gene1.a, gene1.b, gene1.rotation, add_to_container=False))
+            child1[i], child2[i] = child2[i], child1[i]
     return child1, child2
 
 def rank_selection(population, scores):
@@ -255,6 +275,7 @@ def main():
     parameter_grid = list(ParameterGrid(parameters))
     best_score = float('inf')
     best_parameters = None
+    best_genetic_algorithm = None
     best_individual = None
     population = generate_initial_population(population_size, battery_types, counts)
     for parameter_set in parameter_grid:
