@@ -13,7 +13,7 @@ square_size = 1000
 class Container:
     def __init__(self, square_size):
         self.batteries = []
-        self.square_size = square_size * 1000
+        self.square_size = square_size
         self.container_polygon = Polygon([(0, 0), (0, self.square_size), (self.square_size, self.square_size), (self.square_size, 0)])
 
     def add_battery(self, battery):
@@ -37,7 +37,7 @@ class Container:
     def largest_empty_space(self, a, b):
         positions = [(x, y) for x in range(0, self.square_size - a * 1000, 1000) for y in range(0, self.square_size - b * 1000, 1000)]
         random.shuffle(positions)
-        for theta in range(0, 1000, 1):
+        for theta in range(0, 360, 1):
             for x, y in positions:
                 candidate_battery = Battery(x, y, a * 1000, b * 1000, theta, self, True)
                 if self.is_inside(candidate_battery) and not candidate_battery.is_overlapping():
@@ -60,8 +60,8 @@ container = Container(square_size)
 
 class Battery:
     def __init__(self, x, y, a, b, rotation, container, add_to_container=True):
-        self.x = x/1000
-        self.y = y/1000
+        self.x = x
+        self.y = y
         self.a = a
         self.b = b
         self.rotation = rotation
@@ -76,7 +76,7 @@ class Battery:
         ct = self.b/2.*np.cos(t)
         coords = np.column_stack((self.x+st, self.y+ct))
         ellipse = Polygon(coords)
-        return affinity.rotate(ellipse, np.degrees(self.rotation), origin=(self.x, self.y))
+        return affinity.rotate(ellipse, self.rotation, origin=(self.x, self.y))
 
     def is_overlapping(self):
         return self.container.check_overlap(self)
@@ -210,7 +210,7 @@ def crossover(parent1, parent2, max_attempts=100):
         child1 = parent1[:crossover_point] + parent2[crossover_point:]
         child2 = parent2[:crossover_point] + parent1[crossover_point:]
         print(f"Attempting crossover at point {crossover_point}")
-        if evaluate_solution(child1) and evaluate_solution(child2):
+        if validate_solution(child1) and validate_solution(child2):
             print(f"Children after crossover: {child1}, {child2}")
             return child1, child2
     print(f"Crossover failed, parents returned")
@@ -244,8 +244,8 @@ def validate_solution(batteries):
 def main():
     battery_types = [(40000, 20000), (20000, 10000)]
     counts = [39, 161]
-    population_size = 100
-    generation_limit = 1000
+    population_size = 10
+    generation_limit = 50
     scores = []
     parameters = {
         'mutation_rate': [0.01, 0.05, 0.1],
