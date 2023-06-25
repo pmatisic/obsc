@@ -2,14 +2,7 @@
 # Hrvoje Abraham, AVL-AST d.o.o., 11.05.2023.
 #
 # Windows 11 Pro 10.0.22621, Julia 1.9.0 64-bit, CRlibm v1.0.1, Optim v1.7.5
-# usage: julia CMC2023_solution_check.jl CMC_solution_MyTeam.csv
-
-import Pkg; Pkg.add("Combinatorics")
-import Pkg; Pkg.add("CRlibm") 
-import Pkg; Pkg.add("CSV") 
-import Pkg; Pkg.add("DataFrames") 
-import Pkg; Pkg.add("Optim") 
-import Pkg; Pkg.add("Printf") 
+# usage: julia provjera.jl rjesenje.csv
 
 using Combinatorics
 using CRlibm
